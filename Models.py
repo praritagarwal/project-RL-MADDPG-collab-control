@@ -61,8 +61,9 @@ class critic(nn.Module):
         self.l3 = nn.Linear(in_features = (2*self.n_hidden)//3, out_features = self.n_hidden//3)
         self.l4 = nn.Linear(in_features = self.n_hidden//3, out_features = n_atoms)
         
-    def forward(self, states, pl1_actions, pl2_actions):
-        critic_input = torch.cat((states, pl1_actions, pl2_actions), dim = 1)
+    def forward(self, states, all_pl_actions):
+        # all_pl_actions is the array of actions by all the players
+        critic_input = torch.cat((states, all_pl_actions), dim = 1)
         x = F.selu(self.l1(critic_input))
         x = F.selu(self.l2(x))
         x = F.selu(self.l3(x))
