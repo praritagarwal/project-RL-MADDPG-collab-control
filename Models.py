@@ -14,7 +14,7 @@ import torch.nn.functional as F
 
 
 class actor(nn.Module):
-    def __init__(self, n_states = 24, n_actions = 2, n_hidden = 50, seed = 0):
+    def __init__(self, n_states = 24, n_actions = 2, n_hidden = 256, seed = 0):
         super().__init__()
         
         self.n_states = n_states
@@ -39,7 +39,7 @@ class actor(nn.Module):
 
 
 class critic(nn.Module):
-    def __init__(self, n_states = 24, n_actions= 2, n_atoms = 51, n_hidden = 300, seed = 0, 
+    def __init__(self, n_states = 24, n_actions= 2, n_atoms = 51, n_hidden = 600, seed = 0, 
                  output = 'logprob'):
         # output: whether output should be softmax or log_softmax
         super().__init__()
@@ -68,9 +68,9 @@ class critic(nn.Module):
     def forward(self, states, all_pl_actions):
         # all_pl_actions is the array of actions by all the players
         critic_input = torch.cat((states, all_pl_actions), dim = 1)
-        x = F.selu(self.l1(critic_input))
-        x = F.selu(self.l2(x))
-        x = F.selu(self.l3(x))
+        x = F.leaky_relu(self.l1(critic_input))
+        x = F.leaky_relu(self.l2(x))
+        x = F.leaky_relu(self.l3(x))
         x = self.act(self.l4(x), dim = 1) # outputs the log_prob for 
                                           # each 'atom' of the categorical distribution
         return x
