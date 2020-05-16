@@ -56,7 +56,11 @@ class critic(nn.Module):
             print('Wrong value for parameter: output. Please choose from either prob or logprob')
         
         torch.manual_seed(seed)
-        self.l1 = nn.Linear(in_features = self.n_states + 2*self.n_actions, out_features = self.n_hidden)
+        # our critic will take the obsv. and the actions of all the players as its input
+        # note as per the MADDG paper, the actor can only use local information available to the player
+        # but its critic can use extra information such as the actions of other players also
+        # here we are merely extending that to include the obs. of other players also
+        self.l1 = nn.Linear(in_features = 2*self.n_states + 2*self.n_actions, out_features = self.n_hidden)
         self.l2 = nn.Linear(in_features = self.n_hidden, out_features = (2*self.n_hidden)//3)
         self.l3 = nn.Linear(in_features = (2*self.n_hidden)//3, out_features = self.n_hidden//3)
         self.l4 = nn.Linear(in_features = self.n_hidden//3, out_features = n_atoms)
@@ -68,6 +72,6 @@ class critic(nn.Module):
         x = F.selu(self.l2(x))
         x = F.selu(self.l3(x))
         x = self.act(self.l4(x), dim = 1) # outputs the log_prob for 
-                                               # each 'atom' of the categorical distribution
+                                          # each 'atom' of the categorical distribution
         return x
 
