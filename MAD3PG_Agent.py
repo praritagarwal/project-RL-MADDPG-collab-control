@@ -30,10 +30,11 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 class Agent():
-    def __init__(self, n_states = 24, n_actions = 2, actor_hidden = 50, 
-                 critic_hidden = 300, seed = 0, roll_out = 5, replay_buffer_size = 1e6, 
+    def __init__(self, n_states = 24, n_actions = 2, actor_hidden = 256, 
+                 critic_hidden = 600, seed = 0, roll_out = 5, replay_buffer_size = 1e6, 
                  replay_batch = 128, lr_actor = 1e-4,  lr_critic = 1e-4, epsilon = 0.3, 
-                 tau = 1e-3,  gamma = 1, update_interval = 4, noise_fn = np.random.normal, 
+                 epsilon_decay_rate = 0.999, tau = 1e-3,  gamma = 1, 
+                 update_interval = 4, noise_fn = np.random.normal, 
                  vmin = -10, vmax = 10, n_atoms = 51, n_agents = 2):
         
         self.n_agents = 2
@@ -48,6 +49,7 @@ class Agent():
         self.lr_actor = lr_actor 
         self.lr_critic = lr_critic 
         self.epsilon = epsilon # to scale the noise before mixing with the actions; same as in D4PG paper
+        self.epsilon_decay_rate = epsilon_decay_rate
         self.tau = tau # for soft updates of the target networks
         self.gamma = gamma 
         # note that we want the reacher to stay in goal position as long as possible
@@ -136,7 +138,7 @@ class Agent():
             for idx in range(self.n_agents):
                 self.local_actors[idx].eval()
                 actions = self.local_actors[idx](states[idx]).cpu().detach().numpy()
-                noise = self.noise(size = actions.shape)
+                noise = self.epsilon*self.noise(size = actions.shape)
                 actions = np.clip(actions + noise, -1, 1)[0]
                 actions_list.append(actions)
                 self.local_actors[idx].train()
@@ -154,6 +156,7 @@ class Agent():
         self.t_step = (self.t_step+1)%self.update_every
         if self.t_step == 0 and self.memory.__len__() > 2*self.replay_batch:
             self.learn()
+            self.epsilon = max(self.epsilon_decay_rate*self.epsilon, 0.1 )
     
     def learn(self):
         # sample a batch of memories from the replay buffer
