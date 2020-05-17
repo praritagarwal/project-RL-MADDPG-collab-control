@@ -23,6 +23,10 @@ The task is episodic, and in order to solve the environment, your agents must ge
 
 The environment is considered solved, when the average (over 100 episodes) of those **scores** is at least +0.5.
 
+Following is a graph of scores obtained by the agent during training.
+
+![Scores vs Episodes](graphs/ScoreVsEpisode.png)
+
 ### Getting Started
 
 1. Download the environment from one of the links below.  You need only select the environment that matches your operating system:
@@ -37,9 +41,13 @@ The environment is considered solved, when the average (over 100 episodes) of th
 
 2. Place the file in the DRLND GitHub repository, in the `p3_collab-compet/` folder, and unzip (or decompress) the file. 
 
+Additionally, the project requires python 3.6, pytorch v1.5.0 and Unity ML-Agent v0.4.0 along with Unity. The full set of dependencies needed to build a virtual environment for this project can be found in [this file](https://github.com/praritagarwal/project-RL-navigation/blob/master/requirements.txt).
+
 ### Instructions
 
-Follow the instructions in `Tennis.ipynb` to get started with training your own agent!  
+Follow the instructions in `Tennis.ipynb` to get started with training your own agent!
+
+The methodology implemented by us combines elements of [MADDPG](https://arxiv.org/abs/1706.02275), [D4PG](https://arxiv.org/abs/1804.08617) and the [Distributional Perpective](https://arxiv.org/abs/1707.06887). We dub this as MAD3PG: Multi Agent Distributional Deep Deterministic Policy Gradients. The agent is an instance of the Agent class provided in the [MAD3PG Agent](MAD3PG_Agent.py) module while the actor and critic networks used by it are provided in the [Models](Models.py) module.
 
 ### (Optional) Challenge: Crawler Environment
 
